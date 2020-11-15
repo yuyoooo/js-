@@ -320,6 +320,100 @@ let global = function() {
 
 ## 定型数组
 
+> 用于webGL的特别数组
+>
+
+## Map
+
+> 键/值 存储机制
+>
+
+### 基本
+
+`new Map([['key1','value1'],['key2','value2']...])`
+
+### key
+
+**映射的key是没有类型限制的**
+
+### 语法
+
+- `size` 获取长度
+- `set(key,value)` 添加元素
+- `get(key)` 获取key对应的value
+- `has(key) => bloolean` 判断是否包含当前key
+- `delete(key)` 删除
+- `clear()` 清空
+
+### 顺序与迭代
+
+- `entries() `是默认迭代器
+- `for...of`
+- `forEach`
+- `keys`
+- `values`
+- `[...map]` 通过解构转换为数组
+
+### Map与Object
+
+- 删除 选Map
+- 存储 选Map
+- 插入 选Map
+- 查找 选Object
+
+## weakMap
+
+> 弱映射  不被引用则直接被垃圾回收机制回收 里面的键值对 被清空 
+
+## Set
+
+### 基本
+
+- `new Set(['value1','value2','value3'...])`
+
+- `const s2 = new Set({`  自定义迭代器初始化合集
+
+  `[Symbol.iterator]: function*() {` 
+
+  `yield "val1";`
+
+   `yield "val2";`
+
+   `yield "val3";` 
+
+  `} });` 
+
+### 语法
+
+- `add(val)` 增加
+- `has(val)` 查询
+- `size` 数量
+- `delete(val)` 删除
+- `clear()` 清空
+
+### 迭代
+
+- `for...of`
+- `forEach()`
+- `entries()`
+- `[...map]`
+- `values()`
+- `keys()`
+
+### 注意
+
+- 某些 Set 操作是有关联性的，因此最好让实现的方法能支持处理任意多个集合实例。
+- set会保留顺序，所有方法返回的集合必须保证顺序。
+- 不要修改已有的集合实例
+
+## WeakSet
+
+# 迭代器与生成器
+
+
+
+
+
 
 
 
