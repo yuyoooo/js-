@@ -14,6 +14,8 @@
 12. `e` 元素
 13. `start` 开始
 14. `end` 结束
+15. `:` 类型
+16. `s`  元素
 
 # 变量作用域与内存
 
@@ -319,6 +321,345 @@ let global = function() {
 - `reduceRight(fn)`
 
 ## 定型数组
+
+## Map
+
+> 键/值存储机制
+
+### 基本API
+
+-  `new Map([['key1','val1'],['key2','val2']])` 
+- `set('key','val')` 
+- `get(key)` 
+- `has(key) => BL`
+- `size`
+- `delete(key)`
+- `clear()`
+
+### 顺序与迭代
+
+- `for(let m of map.entries()) {}`
+- `[...map]` 转数组
+- `forEach`
+
+## Set
+
+### 基本API
+
+- `new Set()`
+- `add()`
+- `has()`
+- `size`
+- `delete()`
+- `clear()`
+
+### 顺序迭代
+
+- `values()`
+- `entries()`
+
+# 迭代器与生成器
+
+## 迭代器
+
+### 理解迭代
+
+- 循环是迭代的基础
+- 迭代在一个有序集合上进行
+
+### 迭代器模式
+
+- 把有些结构称为“可迭 代对象”（**iterable**）
+- **元素是有限的**
+- 无歧义的**遍历顺序**
+
+### 可迭代协议
+
+#### 实现Iterable需要具备的能力
+
+- 支持迭代的自我识别能力
+- 创建实现 Iterator 接口的对象的能力
+- 在 ECMAScript 中，这意味着必须暴露一个属性作为“**默认迭代器**”，而 且这个属性必须使用特殊的 Symbol.iterator 作为键
+
+#### 内置类型包含Iterable
+
+- 字符串
+- 数组
+- 映射
+- 集合
+- arguments 对象
+- NodeList 等 DOM 集合类型
+
+#### 接收可迭代对象的原生特性
+
+- for...of
+- 数组解构
+- 扩展操作符
+- Array.form()
+- 创建集合
+- 创建映射
+- Promise.all()
+- Promise.race()
+- yield* 操作符
+
+#### 迭代器协议
+
+##### 解释
+
+- `迭代器`是一种一次性使用的对象，用于迭代与其关联的可迭代对象
+- 使用 `next()` 迭代
+- next() 调用成功后返回 `IteratorResult` 对象 
+  - `done: BL` 为 true 结束
+  - `value` 可迭代的下一个值
+  - 当 `value` 值为 `undefined` 后 `done` 为 `true`
+- 不同迭代器没有联系
+- 可迭代对象被修改 next() 也会响应变化
+- 迭代器指向可迭代对象的引用 会阻止垃圾回收
+
+##### 自定义迭代器
+
+> 为没有迭代器的添加自定义的迭代
+
+- `[Symbol.iterator]() {}` 需要return {next () {}} 用于迭代
+
+- `next()`
+
+- ```js
+  class Count {
+  	constructor(limit) {
+  		this.limit = limit
+  	}
+    	// 自定义的迭代器  
+  	[Symbol.iterator]() {
+  		let limit = this.limit,
+  				count = 1
+  		return {
+              // 需要return next()
+  			next() {
+  				if(count <= limit) {
+  					return {done:false,value:count++}
+  				}else{
+  					return {done:true,value:undefined}
+  				}
+  			}
+  		}
+  	}
+  }
+  
+  let c = new Count(3)
+  let f = new Count(10)
+  // 有了 [Symbol.iterator]() 可以迭代
+  for(let item of c) {
+  	console.log(item)
+  }
+  for(let i of f) {
+  	console.log(i)
+  }
+  ```
+
+##### 终止迭代
+
+- `for-of`  `return break continue throw`
+
+- 结构操作并未消费所有值
+
+  - return 需返回一个 `IteratorResult`
+
+  - 迭代器没有关闭可以从上次地方继续迭代
+
+  - ```js
+    let arr = [1,1,1,2,3,5,4]
+    let ite = arr[Symbol.iterator]()
+    for(let i of ite) {
+    	console.log(i)
+    	if(i > 3) {
+    		break
+    	}
+    }
+    console.log('----------------------')
+    for(let i of ite) {
+    	console.log(i)
+    }
+    ```
+
+## 生成器
+
+### 基础
+
+- 定义：`*fn(){}`
+- 不能是箭头函数
+- `*`不受两侧空格影响
+
+### yield
+
+- 可以用于停止和执行生成器
+
+- 生成器在遇到yield关键字之前会正常执行
+
+- 遇到yield知乎停止执行 函数作用域会保存
+
+- 停止的生成器只能通过 next 继续执行
+
+- **只能用在生成器中**
+
+- 生成器可作为可迭代对象
+
+- 可以循环生成
+
+- ```js
+  function* generatorFn(n) {
+  	while(n--) {
+  		yield n
+  	}
+  }
+  ```
+
+- 实现输入和输出
+
+- 产生可迭代对象
+
+  - `yield* [1,2,3]` 生成可迭代对象 类似于循环生成 `yield*`
+
+- `yield*`实现递归算法
+
+### 生成器作为默认迭代器
+
+```js
+class Foo {
+	constructor() {
+		this.value = [1,2,3,4,5,6]
+	}
+	*[Symbol.iterator]() {
+		yield* this.value
+	}
+}
+```
+
+### 提前终止生成器
+
+- `next()`
+- `return()`
+- `throw`
+
+# 对象、类与面向对象变编程
+
+## 属性的类型
+
+1. 数据属性
+
+   - `[[Configurable]]` 
+     - 是否可以delete
+     - 是否可以重新定义
+     - 是否可以修改特性
+     - 特性是否可以改为访问器属性
+     - 默认为true
+   - `[[Enumerable]]`
+     - 是否for-in
+     - 默认true
+   - `[[Writable]]`
+     - 是否可修改
+     - `Writable` 设置为`false`之后无法被修改 在严格模式时对其进行修改会报错
+   - `[[Value]]`
+     - 包含的实际值
+   - `Object.defineProperty(obj,str,{})`
+     - 对对象的 str 属性的 `Configurable` `Enumerable` `Writable` `Value` 进行操作
+
+2. 访问器属性
+
+   - `[[Configurable]]`
+
+     - 可否delete 
+     - 可否重定义
+     - 可否改为数据属性
+     - 默认true
+
+   - `[[Enumerable]]`
+
+     - 可否for-in
+
+   - `[[Get]]`
+
+     - 获取函数 默认undefined
+
+   - `[[Set]]`
+
+     - 设置函数 默认undefined
+     - 不要给当前监听的属性赋值 会超出栈
+
+   - ```js
+     let obj = {
+     	home:2020,
+     	status:'init',
+     	year:2020
+     }
+     Object.defineProperty(obj,"home",{
+     	get() {
+     		return this.home
+     	},
+     	set(newValue) {
+     		if(newValue >= 2020) {
+     			this.year = 2020
+     			this.status = 'init'
+     		}else{
+     			this.year = newValue
+     			this.status = 'edit'
+     		}
+     	}
+     })
+     obj.home = 2009
+     console.log(obj.status)
+     ```
+
+## 定义多个属性
+
+- `Object.defineproperties(obj,{name:{set(){},get(newValue){},value:value},...})` 
+- 对多个属性同事进行操作
+
+## 读取属性特性
+
+- `Object.getOwnPropertyDescriptor(obj,name)`
+  - 获取对象属性的特性
+  - `value`  `configurable`  `set`  `get`  `enumerable`  `writable`
+- `Object.getOwnPropertyDescriptors(obj)`
+  - 获取对象所以属性的特性
+
+## 合并对象
+
+- `Object.assign(obj1,obj2) => obj`
+- 是浅复制
+- 前面的对象属性有同名会被后面的覆盖
+
+## 对象标识及相等判断
+
+- `Object.is(s1,s2)`
+
+## 增强的对象语法
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
