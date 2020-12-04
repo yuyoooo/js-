@@ -543,7 +543,9 @@ class Foo {
 
 # 对象、类与面向对象变编程
 
-## 属性的类型
+## 理解对象
+
+### 属性的类型
 
 1. 数据属性
 
@@ -610,12 +612,12 @@ class Foo {
      console.log(obj.status)
      ```
 
-## 定义多个属性
+### 定义多个属性
 
 - `Object.defineproperties(obj,{name:{set(){},get(newValue){},value:value},...})` 
 - 对多个属性同事进行操作
 
-## 读取属性特性
+### 读取属性特性
 
 - `Object.getOwnPropertyDescriptor(obj,name)`
   - 获取对象属性的特性
@@ -623,23 +625,32 @@ class Foo {
 - `Object.getOwnPropertyDescriptors(obj)`
   - 获取对象所以属性的特性
 
-## 合并对象
+### 合并对象
 
 - `Object.assign(obj1,obj2) => obj`
 - 是浅复制
 - 前面的对象属性有同名会被后面的覆盖
 
-## 对象标识及相等判断
+### 对象标识及相等判断
 
 - `Object.is(s1,s2)`
 
-## 增强的对象语法
+### 增强的对象语法
 
+1. 属性简写
+   - `{name}`
+2. 可计算属性
+   - 对象键名可以动态赋值
+   - `{ [name] : '' }`
+   - `{ [fn()] : ''}`
+3. 简写方法
+   - `{ set() { }}`
+   - `{ [name] () {}}`
 
+### 对象解构
 
-
-
-
+1. 基础解构
+   - 
 
 
 
