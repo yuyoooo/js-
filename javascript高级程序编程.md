@@ -4,7 +4,7 @@
 2. `arr` 是做
 3. `str` 字符串
 4. `RE` RegExp
-5. `BL` boolean
+5. `BL`/`bol` boolean
 6. `length` 长度
 7. `fn` function
 8. `index` 下标
@@ -650,7 +650,427 @@ class Foo {
 ### 对象解构
 
 1. 基础解构
-   - 
+   
+   - `let {str} = {str:str}` 为str赋值
+   - `let { str : name } = {str:''}` 为name赋值
+   
+2. 嵌套解构
+
+   - ```js
+     let obj = { name : str }
+     let copy = {}
+     // 需要用 ( ) 包裹代码
+     ({ name : copy.name } = obj) // 为copy复制name参数
+     ```
+
+3. 部分解构
+
+   - 涉及多个属性解构复制当有错误时整个解构只会完成一部分
+   - `try{} catch {}`
+
+4. 参数上下文匹配
+
+   - 在`函数列表中`解构赋值 不影响`arguments`，单可以在函数中使用局部变变量
+   - `function fn(name,{age,height}) {}`
+
+## 创建对象
+
+### 工厂模式
+
+1. 使用函数`return obj`
+2. 没有解决对象标识问题
+
+### 构造函数模式
+
+#### 基础
+
+1. `创建构造函数` 使用 `new` 使用创建对象
+2. 构造函数首字母大写
+3. new 对象会执行
+   - 在内存中创建一个对象
+   - 这个新对象内部的 `[[Prototype]]` 特性被赋值为构造函数的`prototype`属性
+   - 构造函数内部的this被赋值为这个新对象
+   - 执行构造函数内部代码
+   - 如果构造函数返回非空对象则返回该对象；否则，返回刚创建的新对象
+4. `constructor` 可以获取构造函数
+5. `instanceof`可以判断是否是该构造函数
+
+#### 构造函数也是函数
+
+1. 构造函数与普通函数区别是**调用方式不同**
+2. 构造函数也可以直接调用 **this 执行window**
+
+#### 构造函数的问题
+
+- 相同构造函数创建的不同对象 方法不等 `console.log(person1.sayName == person2.sayName); // false`
+
+- 可以将方法定义在外 内部引用即可 这样不同对象方法是同一个
+
+- 虽然不同的对象现在公用一个共同全局作用域但是作用域也乱了 可用 **原型模式**来改变
+
+- ```js
+  function Person(name, age, job){
+   this.name = name;
+   this.age = age;
+   this.job = job;
+   this.sayName = sayName;
+  } 
+  ```
+
+#### 原型模式
+
+**理解原型**
+
+1. 每个函数会创建一个 **prototype** 包含应该特定引用类型的实例共享的属性与方法
+
+2. 可以通过 **prototype** 进行共享属性及方法
+
+3. `Object.setPrototypeOf(obj = 需要设置原型的对象,prototype = 新原型 obj / null)` 想实例私有特性 `[[Prototype]]`写入新值
+
+   - 会涉及所有访问`[[prototype]]`对象的代码
+   - **会严重影响代码性能**
+
+4. 使用 `Object.create(prototypeObj)`来创建新对象，并为其指定原型
+
+   - 创建对象 并且对象的原型是 `prototypeObj`
+
+   - ```js
+     let biped = {
+      numLegs: 2
+     };
+     let person = Object.create(biped);
+     person.name = 'Matt';
+     console.log(person.name); // Matt
+     console.log(person.numLegs); // 2
+     console.log(Object.getPrototypeOf(person) === biped); // true 
+     ```
+
+**原型层级**
+
+- 读取对象属性会先查找 对象 再查找 prototype
+- 当实例有参数时 **原型上的参数会被遮盖** 无法访问
+  - `hasPrototypeProperty` 判断为false
+
+**原型和in操作符**
+
+- `str in obj => bol` 判断 原型是否有参数
+- `hasOwnProperty` 仅判断实例
+
+**属性枚举顺序**
+
+1. 不确定
+   - `for-in`
+   - `Object.keys()`
+2. 确定(升序枚举数值键)
+   - `Object.getOwnPropertyNams()`
+   - `Object.getOwnPropertySymbols()`
+   - `Object.assign()`
+
+### *对象迭代
+
+- `Object.values(obj)`
+- `Object.entries(obj)`
+
+## 继承
+
+### 原型链
+
+
+
+# 代理与反射
+
+## 代理基础
+
+### 创建空代理
+
+1. `new Proxy(obj = 代理对象,handler = 处理对象)`
+2. 代理对象没有 `prototype`
+3. 无法使用 `instanceof Proxy`
+
+### 定义捕获器
+
+> 基本操作的拦截器
+>
+
+1. 基本操作的拦截器
+
+2. 可以包含对个捕获器
+
+3. 代理在操作传播到目标对象之前先调用捕获器函数，从而拦截并修改相应的行为
+
+4. ```js
+   let obj = {
+   	name: 'yu'
+   }
+   let handler = {
+   	get() {
+   		return 'editName'
+   	}
+   }
+   const proxy = new Proxy(obj, handler)
+   console.log(proxy.name) // 'editName'
+   ```
+
+### 捕获器参数和反射API
+
+- `get(target = 目标对象,property = 属性键,receiver = proxy对象){}`
+- `Reflect` 全局的 原始行为
+  - 不需要 `return target [property]`
+  - `return Reflect.get(...argument)`
+  - `handler = {get:Reflect.get}`
+  -  `new Proxy(target, Reflect)` 空代理
+
+### 捕获器不变式
+
+> 在数据不可改变时报错
+
+### 可撤销代理
+
+1. 解释：中断代理对象与目标对象之间的关系
+2. revocable()
+   - 支持撤销代理对象与目标对象的关联
+   - 撤销操作不可逆
+   - 撤销函数是幂等 （多次撤销效果一样）
+   - 撤销之后调用代理报错
+
+### 实用反射API
+
+#### 反射API与对象API
+
+1. 反射API不限于捕获处理程序
+2. 大多数反射API方法在Object类型上有对应的方法
+
+#### 状态标记
+
+1. 含义：很多反射方法返回**状态标记**的布尔值 标识意图执行的操作是否成功
+2. 提供状态标记的方法
+   - `Reflect.defineProperty()`
+   - `Reflect.preventExtensions()`
+   - `Reflect.setPrototypeOf()`
+   - `Reflect.set()`
+   - `Reflect.deleteProperty()`
+
+#### 用一等函数替代操作符
+
+1. `Reflect.get()`  替代访问操作符
+2. `Reflect.set()` 替代 = 赋值操作符
+3. `Reflect.has()` 替代 in wit()
+4. `Reflect.deleteProperty()` 替代delete
+5. `Reflect.construct()` 替代 new 操作符
+
+#### 安全的应用函数
+
+1. 问题：通过apply调用函数时，被调用的函数可能定义了自己的apply 
+2. 解决：`Reflect.apply(fn,val,argument)`
+
+### 代理另一个代理
+
+1. 意义：实现多层拦截
+
+### 代理的问题与不足
+
+1. **this问题**
+
+2. 代理与内部槽位
+
+   - 部分内置类型可能无法代理
+   - Date类型的方法依赖于对象内部槽位 [[NumberDate]] 但是代理对象上没有这个槽位 操作报错
+
+   
+
+   
+
+
+
+## 代理捕获器与反射方法
+
+### get()
+
+1. 基本：`get(target,property,receiver) {return Reflect.get(...arguments)}`
+2. 反射API：`Reflect.get()`
+3. 参数：
+   - target = 目标对象
+   - property = 键
+   - receiver = proxy对象
+4. 拦截方式
+   - `proxy.property`
+   - `proxy[property]`
+   - `Object.creat(proxy) [property]`
+   - `Reflect.get(peoxy,property,receiver)`
+5. 捕获器不变式
+   - `target.property` 如果不可修改 则处理返回值必须与target.property相同
+   - `target.property` 不可配置切且 **[[Get]]** 为**undefined** 则处理返回值必须是**undefined**
+
+### set()
+
+1. 基本：`set(target,property,value,receiver){return Reflect.set(...arguments)}`
+2. 返回值：BL 严格模式TypeError
+3. 参数：
+   - target = 目标对象
+   - property = 键
+   - value = 值 
+   - receiver = proxy对象
+4. 拦截方式：
+   - `proxy.property = value`
+   - `proxy[property] = value`
+   - `Object.creat(proxy) [property] = value`
+   - `Reflect.set(proxy,property,value,receiver)`
+5. 捕获器不变式
+   - target.property 不可变则不能修改
+   - target.property不可配置切**[[Set]]** 为**undefined**则不可修改目标值
+
+### has()
+
+1. 基本：`has(target,property){return Reflect.has(...arguments)}`
+2. 返回值：BL
+3. 参数：
+   - target = 目标对象
+   - property = 键
+4. 拦截方式
+   - `property in proxy`
+   - `property in Object.creat(proxy)`
+   - `with(peoxy) { (property)}`
+   - `Reflect.has(proxy,property)`
+5. 捕获器不变式
+   - target.property存在且不可配置 则必须返回true
+   - target.property 存在且不可扩展 则必须返回true
+
+### defineProperty()
+
+### getOwnPropertyDescriptor()
+
+### deleteProperty()
+
+1. 基本：`deleteProperty(target,property){return Reflect.deleteProperty(...arguments)}`
+2. 返回值：BL
+3. 参数：
+   - target = 目标对象
+   - property = 键
+4. 拦截方式
+   - `delete proxy.property`
+   - `delete proxy[property]`
+   - `Reflect.deleteProperty(proxy,property)`
+5. 捕获器不变式
+   - target.property存在且不可配置 则必须返回true
+
+### ownKeys()
+
+### getPrototypeOf()
+
+### setPrototypeOf()
+
+### isExtensible()
+
+### preventExtensions()
+
+### apply()
+
+1. 基本：`apply(target,thisArg,...argumentsLists) {return Reflect.apply(...arguments)}`
+2. 参数：
+   - target = 目标对象
+   - thisArg = 调用函数时的this参数
+   - argumentsLists = 调用函数时的参数列表
+3. 拦截方式
+   - `proxy(...argumentsList)` 
+   - `Function.prototype.apply(thisArg, argumentsList)` 
+   - `Function.prototype.call(thisArg, ...argumentsList)` 
+   - `Reflect.apply(target, thisArgument, argumentsList)`
+4. 捕获器不变式
+   - target 必须是一个函数对象
+
+### construct()
+
+1. 基本：`construct(target,argumentsLists,newTarget) {return Reflect.construct(...arguments)}`
+2. 返回值：obj
+3. 参数：
+   - target = 目标构造函数
+   - argumentsLists = 传给目标函数的参数列表
+   - newTarget = 最初被调用的构造函数
+4. 拦截方式
+   - `new proxy(...atgumentsLists)`
+   - `Reflect.construct(target,argumentsLists,newTarget)`
+5. 捕获器不变式
+   - target必须可以用作构造函数
+
+## 代理模式
+
+> 使用代理可以在代码中实现一些有用的编程模式
+
+1. 跟踪属性访问
+   - 监控对象属性被访问 更改 查询
+2. 隐藏属性
+   - 方便隐藏属性
+3. 属性验证
+   - 判断是否需要set
+4. 函数与构造函数参数验证
+   - 对函数及构造函数进行审查
+5. 数据绑定与可观察对象
+   - proxy代理观察数据
+
+# 函数
+
+## 箭头函数
+
+1. 语法：`() => {}`
+2. 不能使用场景：
+   - arguments
+   - super
+   - new.target
+   - 不能用于构造函数
+   - 没有 property 属性
+
+## 函数名
+
+1. 函数可以有多个名称
+
+2. `newFn =  fnName` 函数赋值不带()时 仅赋值函数指针
+
+   ```js
+   function sum(num1, num2) {
+    return num1 + num2;
+   }
+   let anotherSum = sum; 
+   ```
+
+## 理解参数
+
+1. 参数数量没有限制
+2. arguments
+   - 非箭头函数可以访问arguments
+   - 是一个类Array的对象
+3. 箭头函数只能通过命名的参数进行访问
+
+## 没有重载
+
+1. 无法定义多个同名函数
+
+## 默认参数
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
