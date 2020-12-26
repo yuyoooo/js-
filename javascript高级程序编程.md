@@ -1,7 +1,7 @@
 # 标识注释
 
 1. `obj` 对象
-2. `arr` 是做
+2. `arr` 数组
 3. `str` 字符串
 4. `RE` RegExp
 5. `BL`/`bol` boolean
@@ -1113,33 +1113,473 @@ class Foo {
 
 ### caller
 
+1. 作用：调用当前函数的函数
+2. 注意：
+   - 在全局作用域调用为 unll
+   - 严格模式下访问报错
 
+### new.target
 
+1. 引用调用new.target 是undefined
+2. new 构建的返回构造函数
 
+## 函数属性与方法
 
+1. **属性**
+   - `length`  返回函数定义的命名参数的个数  `fn.length`
+   - `prototype` 保存所有实例方法  **不可枚举**
+2. **方法**
+   - `apply(this,arr/arguments)`
+     - 用来指定this值调用函数
+     - 参数 this 和Array或者arguments对象
+   - `call(this,s,s...)`
+     - 同上
+     - 区别：参数
+   - `bind(this,s,s...)`
+     - 会创建一个新函数并且函数this指向提供的this
+     - 除了第一个是this其他都是参数
 
+## 函数表达式
 
+**函数声明**
 
+1. 会有**函数声明提升**的问题
 
+**函数表达式**
 
+1. `let fn = function(){}`
+2. 是**匿名函数**
+3. 不会有**函数声明提升**的问题
 
+**注意**
 
+```js
+if (condition) {
+ function sayHi() {
+ console.log('Hi!');
+ }
+} else {
+ function sayHi() {
+ console.log('Yo!');
+ }
+} 
+```
 
+1. 因为函数声明提升这样写会有问题
+2. js引擎会纠正其声明
+3. 不同浏览器纠正方法不同
+4. 可以使用函数表达式
 
+## 递归
 
+1. 解释：函数递归通常是自己调用自己
+2. 问题
+   - 函数如果赋值给其他变量可能会有问题
+   - 使用 **arguments.call()**来调用
+   - 严格模式下可能无法使用 arguments.callee()
+   - 可以使用 函数表达式
 
+## 尾调优化
 
+1. 描述：es6新增的管理优化机制 暂时还不确认浏览器是否跟进
 
+2. ```js
+   function outerFunction() {
+    return innerFunction(); // 尾调用
+   } 
+   (1) 执行到 outerFunction 函数体，第一个栈帧被推到栈上。
+   (2) 执行 outerFunction 函数体，到 return 语句。计算返回值必须先计算 innerFunction。
+   (3) 执行到 innerFunction 函数体，第二个栈帧被推到栈上。
+   (4) 执行 innerFunction 函数体，计算其返回值。
+   (5) 将返回值传回 outerFunction，然后 outerFunction 再返回值。
+   (6) 将栈帧弹出栈外。
+   在 ES6 优化之后，执行这个例子会在内存中发生如下操作。
+   (1) 执行到 outerFunction 函数体，第一个栈帧被推到栈上。
+   (2) 执行 outerFunction 函数体，到达 return 语句。为求值返回语句，必须先求值 innerFunction。
+   (3) 引擎发现把第一个栈帧弹出栈外也没问题，因为 innerFunction 的返回值也是 outerFunction
+   的返回值。
+   (4) 弹出 outerFunction 的栈帧。
+   (5) 执行到 innerFunction 函数体，栈帧被推到栈上。
+   (6) 执行 innerFunction 函数体，计算其返回值。
+   (7) 将 innerFunction 的栈帧弹出栈外。
+   ```
 
+3. 优化：优化之后会少一个栈
 
+4. 条件：
 
+   - 严格模式
+   - 外部函数的返回值是对尾调函数的调用
+   - 尾调函数返回后不需要执行额外的操作
+   - 尾调函数不是引用外部函数作用域中自由变量的闭包、
 
+5. ```js
+   "use strict";
+   // 基础框架
+   function fib(n) {
+    return fibImpl(0, 1, n);
+   }
+   // 执行递归
+   function fibImpl(a, b, n) {
+    if (n === 0) {
+    return a;
+    }
+    return fibImpl(b, a + b, n - 1);
+   } 
+   ```
 
+## 闭包
 
+1. 定义：引用了另一函数作用域中变量的函数
 
+2. 问题：闭包会引用函数内的变量导致函数执行完毕不会被回收
 
+3. this：
 
+   - 非箭头函数
 
+     - 函数上下文
+
+     - 全局调用时 非严格模式是 **window** 严格模式是 **undefined**
+
+     - 作为某个对象的方法调用this等于这个对象
+
+     - 在**对象中调用时** `匿名函数`不会绑定到对象 会绑定到window或者undefined  如下：
+
+     - ```js
+       window.name = 'ooo'
+       let obj = {
+       	name: 'yu',
+       	con() {
+       		return function () {
+       			console.log(this.name)
+       		}
+       	}
+       }
+       obj.con()() // ‘ooo’
+       ```
+
+   - 箭头函数 this 指向调用他的上下文
+
+4. 内存泄漏
+
+   - ie9之前回收机制不同
+   - HTML元素保存在闭包作用域中元素不能销毁
+   - 必须手动将HTML元素设为null才行
+
+## 立即调用的函数表达式
+
+1. 解释：立即调用的匿名函数又叫 **立交调用的函数表表达式**
+2. 表达式：`(function(){})()`
+3. es6 IIFE没有那么必要 因为块级作用域无需IIFE就可以实现
+
+## 私有变量
+
+1. 含义：任何定义在函数或块中的变量都可以认为是私有的 
+2. 特权方法：能够访问函数私有变量的共有方法
+
+### 静态私有变量
+
+1. 对象的变量
+2. 可以为对象添加特权方法访问变量
+3. `Obj.perototype.fn`私有变量
+
+### 模块模式
+
+1. 单例对象实现相同的隔离与封装
+
+2. ```js
+   let singleton = function() {
+    // 私有变量和私有函数
+        let privateVariable = 10;
+        function privateFunction() {
+        return false;
+        }
+    // 特权/公有方法和属性
+    return {
+        publicProperty: true,
+        publicMethod() {
+        privateVariable++;
+        return privateFunction();
+        }
+    };
+   }(); 
+   ```
+
+### 模块增强模式
+
+1. 在返回对象之前对其进行增强
+
+# Promise与异步函数
+
+## 异步编程
+
+### 同步与异步
+
+1. **同步行为**：顺序执行处理器指令
+2. **异步行为**：类似于系统中断，即当前进程外部的实体可以触发代码执行
+
+### 以往的异步编程
+
+1. 通过回调实现异步
+
+## Promise
+
+### Promise基础
+
+#### 创建
+
+1. `new Promise(fn)`
+
+#### 状态
+
+1. `pending `   待定
+2. `fulfilled`  兑现 **(resolved  解决)**
+3. `rejected` 拒绝
+4. 状态**不可逆**
+5. 状态是**私有的** js无法检测状态
+
+#### 结果参数，拒绝理由 
+
+1. 用途：
+   - 表示异步
+   - 访问返回值
+
+#### 控制状态
+
+1. `resolve()`  兑现
+2. `reject()`  拒绝
+3. 只能改变一次
+
+#### Promise.resolve()
+
+1. Promise并非已开始就是待定状态
+2. 通过`Promise.resolve()` 可以实例化一个解决的Promise
+3. 以上的方法可以将任何值转换为Promise
+4. 幂等
+
+#### Promise.reject(err)
+
+1. 实例化一个错误状态的Promise
+2. err: 错误理由
+3. try/catch 不能捕获 Promise.reject()的报错
+
+### Promise的实例方法
+
+#### thenable接口
+
+1. 任何对象都有then() 这个放大被认为实现了thenable接口
+
+#### Promise.prototype.then(onResolved  ,onRejected )
+
+1. 作用：为Promise 添加处理程序的主要方法
+2. 参数
+   - onResolved  成功执行 
+   - onRejected   失败执行  ( 只想添加 onRejected 的话 onResolved = undefined )
+
+#### Promise.prototype.catch()
+
+1. 作用：为Promise添加拒绝方法
+2. 参数：onRejected 方法
+3. 语法糖：`Promise.then(null,onRejected)`
+
+#### Promise.prototype.finally()
+
+1. 作用：在解决或者拒绝状态时执行
+2. 无法知道具体状态
+
+#### 非重入Promise方法
+
+1. then catch finally 会进入微任务
+
+#### 邻近处理程序的执行顺序
+
+1. then catch finally 的执行顺序按照书写顺序
+
+#### 传递解决值和拒绝理由
+
+1. `resolve(res)`
+2. `reject(err)`
+3. `finally(res)`
+
+#### 拒绝与错误处理
+
+#### Promise连锁与合成
+
+**连锁 / 解决回调地狱**
+
+1. 多个then实现顺序异步
+
+2. ```js
+   let p1 = new Promise((resolve, reject) => {
+    console.log('p1 executor');
+    setTimeout(resolve, 1000);
+   });
+   p1.then(() => new Promise((resolve, reject) => {
+    console.log('p2 executor');
+    setTimeout(resolve, 1000);
+    }))
+    .then(() => new Promise((resolve, reject) => {
+    console.log('p3 executor');
+    setTimeout(resolve, 1000);
+    }))
+    .then(() => new Promise((resolve, reject) => {
+    console.log('p4 executor');
+    setTimeout(resolve, 1000);
+    })); 
+   ```
+
+**期约图**
+
+1. 顺序：Promise的顺序是添加的顺序
+
+**Promise.all()与Promise.race()**
+
+1. `Promise.all([]) => promise`
+
+   - 作用：多个Promise对象组合为一个Promise对象
+
+   - 参数：Array
+
+   - 说明：
+
+     - 可迭代参数的元素会通过 Promise.resolve()转换为Promise对象
+     - `[]` 相当于 `promise.resolve()`
+     - Promise.all()  会报错
+
+   - resolve: 只有包含的Promise都解决才会resolve，其中有一个reject整个都会reject
+
+   - reject: 其中一个拒绝则会拒绝 则第一个拒绝的理由为最终理由
+
+   - ```js
+     // 没一个Promise的值 可以用与在Promise使用  有顺序
+     let str = ''
+     
+     let p1 = new Promise((resolve, reject) => {
+     	str = str + 'yu'
+     	resolve(str)
+     })
+     let p2 = new Promise((resolve, reject) => {
+     	str = str + 'hong'
+     	resolve(str)
+     })
+     let p3 = new Promise((resolve, reject) => {
+     	str = str + 'de'
+     	resolve(str)
+     })
+     let p = Promise.all([p1, p2, p3])
+     p.then(res => {
+     	console.log(res)
+     })
+     ```
+
+2. `Promise.race([]) => promise`
+
+   - 作用：返回一组Promise中最先完成的那个 新Promise
+   - 参数：可迭代的Promise集合
+   - 说明：
+     - 可迭代参数的元素会通过 Promise.resolve()转换为Promise对象
+     - `[]` 相当于 `promise.resolve()`
+     - Promise.race()  会报错
+   - 状态：以第一个完成的Promise的状态为最终状态
+   - 阻塞：第一个完成的Promise**不会阻塞**其他Promise的执行
+
+**？串行Promise合成**
+
+### Promise扩展
+
+#### Promise取消 (ES6暂未实现)
+
+1. 描述：当不需要继续执行Promise时，此时需中断取消Promise的执行，但是Es6并未提供相关方法
+
+#### Promise进度
+
+1. 描述：了解当前Promise的执行进度
+2. Es6并未提供相关进度追踪方法
+
+## 异步函数
+
+> ES8 提供的 async/await
+
+### 异步函数
+
+#### async
+
+1. 作用：用于声明异步函数
+2. 范围：函数声明 、函数表达式 、箭头函数 、方法 
+3. return 
+   - 异步函数使用`return`返回值 会被Promise.resolve()包装成一个Promise对象
+   - 没有return则返回undefined
+   - 异步函数始终返回Promise对象
+   - 返回常规值 `then()` 可以直接解包 可以直接使用
+4. 拒绝：当Promise状态为rejected的话异步函数不会被捕获 即 `catch 无法捕获error`
+
+#### await
+
+1. 作用：暂停异步的执行 等待Promise的解决 
+2. return 
+   - 异步函数使用`return`返回值 会被Promise.resolve()包装成一个Promise对象
+   - 没有return则返回undefined
+   - 异步函数始终返回Promise对象
+   - 返回常规值 `then()` 可以直接解包 可以直接使用
+3. 拒绝：await能够捕获拒绝
+4. 限制：
+   - 必须在异步函数中使用
+   - 异步函数的特质不会扩展到嵌套函数中
+
+### 停止和恢复执行
+
+### 异步函数策略
+
+#### 实现 sleep
+
+```js
+function sleep(num) {
+	return new Promise((resolve, reject) => setTimeout(resolve, num))
+}
+async function fn() {
+	let date = Date.now()
+	await sleep(1500)
+	console.log(Date.now() - date)
+}
+fn()
+```
+
+#### 利用平行执行
+
+1. 作用：对await的顺序没有需求的时候可以**平行执行**
+
+2. ```js
+   async function fn() {
+   	let p1 = fn1()
+   	let p2 = fn1()
+   	let p3 = fn1()
+   	await p1
+   	await p2
+   	await p3
+   }
+   ```
+
+#### 串行执行Promise
+
+```js
+function add(num) {
+	return num + 3
+}
+async function fn(num) {
+	num = await add(num)
+	console.log(num)
+	num = await add(num)
+	console.log(num)
+	num = await add(num)
+	return num
+}
+fn(3).then(res => console.log(res))
+```
+
+#### 栈追踪与内存处理
+
+# BOM
 
 
 
