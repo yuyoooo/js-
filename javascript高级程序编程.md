@@ -1581,7 +1581,36 @@ fn(3).then(res => console.log(res))
 
 # BOM
 
+## window
 
+1. 两重身份
+   - Global 对象
+   - js接口
+
+### Global作用域
+
+1. **var** 声明的函数或变量都会变成window对象的属性或者方法
+2. let const 不行
+
+### 窗口关系
+
+1. top ：指向最层窗口
+2. parent ： 指向当前窗口的父窗口
+3. 如果当前窗口是最上层窗口 则parent和top都指向window
+4. self ：就是window窗口 
+
+### 窗口位置与像素比
+
+1. 窗口位置
+   - screenLeft ：窗口相对于屏幕距离左边的位置
+   - screenTop ：窗口相对于屏幕距离右边的位置
+2. 移动
+   - `moveTo(newX,newY)` 移动到新坐标
+   - `moveBy(x,y)` 移动当前位置的距离
+3. 像素比
+   - `window.devicePixelRatio` ：表示物理与逻辑像素之间的比例
+
+### 窗口大小
 
 
 
