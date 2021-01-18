@@ -1612,6 +1612,196 @@ fn(3).then(res => console.log(res))
 
 ### 窗口大小
 
+1. `innerWidth`   `innerHeight`  浏览器视口大小
+2. `outerWdith` `outerHeight`  浏览器窗口自身大小
+3. `resizeTo(newX,newY)`   
+4. `resizeBy(x,y)`
+
+### 视口位置
+
+1. 获取文档相对于视口滚动距离
+
+   - `pageXoffset / scrollX`
+   - `pageYoffset / scrollY`
+
+2. 滚动页面
+
+   - `scroll(x,y)` 滚动到新位置
+
+   - `scrollTo(x,y) `滚动到新位置
+
+   - `scrollBy(x,y)`  当前位置继续滚动
+
+   - `behavior`  平滑滚动属性
+
+   - ```js
+     window.scrollTo({
+      left: 100,
+      top: 100,
+      behavior: 'smooth'
+     }); 
+     ```
+
+### 导航与打开新窗口
+
+### 定时器
+
+1. setTimeout
+2. setInterval
+
+### 系统对话框
+
+1. `alert()`
+2. `confirm() => BL`
+3. `prompt() => str`
+
+### location对象
+
+1. 作用：当前窗口的文档信息，以及导航功能
+2. 即是window对象也是document对象
+3. 参数
+   - hash
+   - host
+   - hostname
+   - href
+   - port
+   - pathname
+   - search
+   - username
+   - password
+   - origin
+   - protocol
+
+### 查询字符串
+
+1. `URLSearchParams`：`new URLSearchParams(window.loaction.search)`
+2. 作用：从location.search的参数中获取数据
+3. 方法
+   - get()
+   - has()
+   - delete()
+   - toString()
+4. 大多数支持`URLSearchParams`的浏览器也支持迭代
+
+### 操作地址
+
+1. 跳转：`location.assign(url)`
+2. `window.location = location.href = location.assign(url)`
+3. location修改属性,并且会刷新URL
+   - hash
+   - search
+   - hostname
+   - pathname
+   - port
+4. `reload()`  重载
+   - reload() 从缓存重载
+   - reload(true) 从服务器重载
+
+### navigator对象
+
+1. 浏览器的类型属性
+
+### 检测插件
+
+### screen对象
+
+1. 用户端信息
+
+### history对象
+
+1. 作用：记录导航历史记录
+2. 是window属性
+3. 出于安全考虑这个对象不会暴露用户访问过的URL，但可以知道是前进和后退
+
+#### 导航
+
+1. `history.go(num)`：前进或者后退
+2. `history.back()` 后退
+3. `history.forward()` 前进
+4. `history.length`  条数
+
+#### 历史状态管理
+
+1. `history.pushState(state对象,title,url)`
+2. 改变URL不刷新浏览器
+3. 会创建新的历史记录
+4. `history.replaceState(Satet对象,title)`
+
+# 客户端检测
+
+# DOM
+
+## 节点层级
+
+1. 根节点：<HTML> 称之为 **文档元素** 
+
+## Node类型
+
+1. `nodeType`：每个节点都有nodeType属性，表示该节点的类型
+2. `nodeName`和nodeValue： 保存节点信息
+3. 节点关系
+   - `childNodes`：每个节点都有 childNodes属性 包含 NodeLists 实例
+   - `NodeLists` ：是一个类数组对象，是实时的
+   - `parentNode`：指向DOM树的父元素
+   - `previousSibling`：上一个节点（没有为null）
+   - `nextSibling`：下一个节点（没有为null）
+4. 操纵节点
+   - `appendChild(e)`
+   - `inserBefore(e,e = 参照节点)`
+   - `cloneNode(BL = 表示是否深入复制)`
+
+### Document类型
+
+
+
+# 事件
+
+## 事件流
+
+### 事件冒泡
+
+1. 解释：从具体的元素开始向上传播直到window对象
+
+### 事件捕获
+
+1. 解释：从上往下触发 从模糊到具体
+2. 注意：旧浏览器不支持
+
+### DOM事件流
+
+1. 解释：DOM事件流分为三个阶段
+   - 事件捕获
+   - 到达目标
+   - 事件冒泡
+
+## 事件处理程序
+
+> 用户或者浏览器执行某种动作
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
